@@ -29,7 +29,7 @@ def opinion_keywords():
 
     nreviews = len(all_reviews)
     ntrain = int(nreviews * .75)
-    train, test = all_reviews[:ntrain], all_reviews[ntrain:]
+    train, test = featuresets[:ntrain], featuresets[ntrain:]
     classifier = nltk.NaiveBayesClassifier.train(train)
     print "Accuracy of bayes classifier is: "
     print nltk.classify.accuracy(classifier, test)
