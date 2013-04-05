@@ -14,10 +14,10 @@ def opinion_keywords():
 
     stopword_set = stopwords.words('english')
     words =  movie_reviews.words()
-    fdist = nltk.FreqDist(word for word in movie_reviews.words()
-                    if word not in stopword_set and \
+    fdist = nltk.FreqDist(word.lower() for word in movie_reviews.words()
+                    if word.lower() not in stopword_set and \
                     word not in string.punctuation)
-    featurelist = fdist.keys()[:500]
+    featurelist = fdist.keys()[:1000]
     
     pos_reviews = [([word for word in movie_reviews.words(fileid)], 'pos') for fileid in movie_reviews.fileids('pos')]
     neg_reviews = [([word for word in movie_reviews.words(fileid)], 'neg') for fileid in movie_reviews.fileids('neg')]
