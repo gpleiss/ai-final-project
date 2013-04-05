@@ -19,8 +19,8 @@ def opinion_keywords():
                     word not in string.punctuation)
     featurelist = fdist.keys()[:500]
     
-    pos_reviews = [(movie_reviews.words(fileid), 'pos') for fileid in movie_reviews.fileids('pos')]
-    neg_reviews = [(movie_reviews.words(fileid), 'neg') for fileid in movie_reviews.fileids('neg')]
+    pos_reviews = [([word for word in movie_reviews.words(fileid)], 'pos') for fileid in movie_reviews.fileids('pos')]
+    neg_reviews = [([word for word in movie_reviews.words(fileid)], 'neg') for fileid in movie_reviews.fileids('neg')]
     all_reviews = pos_reviews + neg_reviews
     random.shuffle(all_reviews)
 
