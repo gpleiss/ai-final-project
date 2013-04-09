@@ -26,4 +26,6 @@ Successful experiments
 - Adding synonyms of most common words to the feature set: this worked and increased the accuracy by 2 points
 
 Same parameters as above
-Accuracy of Bayes classifier: 0.805
+Accuracy of Bayes classifier: 0.805Accuracy of bayes classifier: 0.786
+
+4/8: Added simple feature keywords. TODO: possibly add proper nounds, eg directors' names

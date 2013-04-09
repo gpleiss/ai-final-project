@@ -48,4 +48,30 @@ def opinion_keywords():
     classifier.show_most_informative_features(10)
 
 
-opinion_keywords()
+def generate_feature_keywords():
+    #via Zhuang et all. "Movie Review Mining and Summarization"
+    features = ['film', 'movie', 'story', 'plot', 'script', 'storyline', 
+        'dialogue', 'screenplay', 'ending', 'line', 'scene', 'tale', 
+        'character', 'characterization', 'role', 'fight-scene', 'action-scene', 
+        'action-sequence', 'set', 'battle-scene', 'picture', 'scenery', 
+        'setting','visual-effects', 'color', 'background', 'image', 'music', 
+        'score', 'song', 'sound', 'soundtrack', 'theme', 'special-effects', 
+        'effect', 'CGI', 'SFX']
+
+    f = open('features.txt', 'w')
+    for word in features:
+        f.write("%s\n" % word)
+
+    return features
+
+def load_opinion_keywords():
+    try:
+        return [word for line in open('features.txt', 'r').readline()]
+    except:
+        return generate_feature_keywords()
+
+
+def keyword_opinion_pairs():
+
+# generate_feature_keywords()
+# opinion_keywords()
