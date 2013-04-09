@@ -90,16 +90,24 @@ def load_opinion_keywords():
 
 
 def keyword_opinion_pairs():
-    opinions = set(load_opinion_keywords()[:50])
+    opinions = set(load_opinion_keywords()[:100])
     features = set(load_feature_keywords())
 
-    for sent in movie_reviews.sents()[:50]:
+    for sent in movie_reviews.sents()[:2000]:
         words = set(sent)
-
+        # print opinions
+        # print features
         if words & opinions != set() and words & features != set():
-            print sent
+            new = []
+            for w in sent:
+                if w in opinions or w in features:
+                    new.append(w.upper())
+                else:
+                    new.append(w)
+            print new
         else:
-            print 'ignore'
+            pass
+            # print 'ignore'
 
 keyword_opinion_pairs()
 # generate_feature_keywords()
