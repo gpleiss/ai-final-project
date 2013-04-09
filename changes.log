@@ -8,4 +8,22 @@ For each interview, each feature was marked as binary (1 if present in review, 0
 
 Number of features used: 1000
 Ratio of train set size to test set size: 0.75 to 0.25
-Accuracy of bayes classifier: 0.786
+Accuracy of Bayes classifier: 0.786
+
+
+
+4/8: Continued working on extracting opinion keywords
+
+Failed experiments:
+- Using only adjectives: we realized that there could be important keywords such as 'oscar' or 'masterpiece' that express strong opinion
+
+- Making the top occurring synsets the set of features - not the top occuring words
+
+Same parameters as above
+Accuracy of Bayes classifier: 0.766
+
+Successful experiments
+- Adding synonyms of most common words to the feature set: this worked and increased the accuracy by 2 points
+
+Same parameters as above
+Accuracy of Bayes classifier: 0.805
