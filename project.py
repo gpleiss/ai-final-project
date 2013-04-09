@@ -2,7 +2,7 @@ import nltk
 from nltk.corpus import movie_reviews, stopwords, wordnet
 import string, random
 
-def opinion_keywords():
+def generate_opinion_keywords():
     def determine_features(review, featurelist):
         result = {}
         for f in featurelist:
@@ -45,7 +45,15 @@ def opinion_keywords():
     
     print "Accuracy of bayes classifier is: "
     print nltk.classify.accuracy(classifier, test)
-    classifier.show_most_informative_features(10)
+    opinion_keywords = []
+    f = open('opinions.txt', 'w')
+    for opinion, presence in classifier.most_informative_features(n=len(featurelist)):
+        if presence == 1: 
+            opinion_keywords.append(opinion) 
+            print opinion
+        f.write("%s\n" % opinion)
+
+    return opinion_keywords
 
 
 def generate_feature_keywords():
@@ -64,14 +72,37 @@ def generate_feature_keywords():
 
     return features
 
+def load_feature_keywords():
+    try:
+        with open('features.txt', 'r') as features:
+            return [word for word in features.readline()]
+    except:
+        print "Generating feature keywords."
+        return generate_feature_keywords()
+
 def load_opinion_keywords():
     try:
-        return [word for line in open('features.txt', 'r').readline()]
+        with open('opinions.txt', 'r') as opinions:
+            return [word for word in opinions.readline()]
     except:
-        return generate_feature_keywords()
+        print "Generating opinion keywords. Might take a while."
+        return generate_opinion_keywords()
 
 
 def keyword_opinion_pairs():
+    opinions = set(load_opinion_keywords()[:50])
+    features = set(load_feature_keywords())
 
+    for sent in movie_reviews.sents()[:50]:
+        words = set(sent)
+
+        if words & opinions != set() and words & features != set():
+            print sent
+        else:
+            print 'ignore'
+
+keyword_opinion_pairs()
 # generate_feature_keywords()
+# generate_opinion_keywords()
+# print type(x[0])
 # opinion_keywords()
