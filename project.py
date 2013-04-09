@@ -75,7 +75,7 @@ def generate_feature_keywords():
 def load_feature_keywords():
     try:
         with open('features.txt', 'r') as features:
-            return [word for word in features.readline()]
+            return [word.strip() for word in features.readlines()]
     except:
         print "Generating feature keywords."
         return generate_feature_keywords()
@@ -83,7 +83,7 @@ def load_feature_keywords():
 def load_opinion_keywords():
     try:
         with open('opinions.txt', 'r') as opinions:
-            return [word for word in opinions.readline()]
+            return [word.strip() for word in opinions.readlines()]
     except:
         print "Generating opinion keywords. Might take a while."
         return generate_opinion_keywords()
