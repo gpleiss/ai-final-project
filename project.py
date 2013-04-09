@@ -2,7 +2,7 @@ import nltk
 from nltk.corpus import movie_reviews, stopwords
 import string, random
 
-def opinion_keywords():
+def generate_opinion_keywords():
     def determine_features(review, featurelist):
         result = {}
         for f in featurelist:
@@ -43,7 +43,7 @@ def opinion_keywords():
 
     # classifier = nltk.NaiveBayesClassifier.train(train)
 
-def feature_keywords():
+def generate_feature_keywords():
     #via Zhuang et all. "Movie Review Mining and Summarization"
     features = ['film', 'movie', 'story', 'plot', 'script', 'storyline', 
         'dialogue', 'screenplay', 'ending', 'line', 'scene', 'tale', 
@@ -53,6 +53,20 @@ def feature_keywords():
         'score', 'song', 'sound', 'soundtrack', 'theme', 'special-effects', 
         'effect', 'CGI', 'SFX']
 
+    f = open('features.txt', 'w')
+    for word in features:
+        f.write("%s\n" % word)
+
     return features
 
+def load_opinion_keywords():
+    try:
+        return [word for line in open('features.txt', 'r').readline()]
+    except:
+        return generate_feature_keywords()
+
+
+def keyword_opinion_pairs(): return None
+
+generate_feature_keywords()
 # opinion_keywords()
