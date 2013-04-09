@@ -17,7 +17,11 @@ def opinion_keywords():
     fdist = nltk.FreqDist(word.lower() for word in movie_reviews.words()
                     if word.lower() not in stopword_set and \
                     word not in string.punctuation)
-    featurelist = fdist.keys()[:1000]
+    featurelist = [word for word in fdist.keys()[:3000]
+                    if nltk.pos_tag([word])[0][1] == 'JJ']
+
+    # print len(adjectives)
+    # featurelist = fdist.keys()[:1000]
     
     pos_reviews = [([word for word in movie_reviews.words(fileid)], 'pos') for fileid in movie_reviews.fileids('pos')]
     neg_reviews = [([word for word in movie_reviews.words(fileid)], 'neg') for fileid in movie_reviews.fileids('neg')]
@@ -31,9 +35,10 @@ def opinion_keywords():
     ntrain = int(nreviews * .75)
     train, test = featuresets[:ntrain], featuresets[ntrain:]
     classifier = nltk.NaiveBayesClassifier.train(train)
+    
     print "Accuracy of bayes classifier is: "
     print nltk.classify.accuracy(classifier, test)
-    classifier.show_most_informative_features(10)
+    classifier.show_most_informative_features(100)
     # ntest = nreviews
 
     # classifier = nltk.NaiveBayesClassifier.train(train)
