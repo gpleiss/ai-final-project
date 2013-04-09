@@ -19,12 +19,12 @@ def opinion_keywords():
                     word not in string.punctuation)
     featurelist = [word for word in fdist.keys()[:3000]
                     if nltk.pos_tag([word])[0][1] == 'JJ']
-
-    # print len(adjectives)
-    # featurelist = fdist.keys()[:1000]
     
-    pos_reviews = [([word for word in movie_reviews.words(fileid)], 'pos') for fileid in movie_reviews.fileids('pos')]
-    neg_reviews = [([word for word in movie_reviews.words(fileid)], 'neg') for fileid in movie_reviews.fileids('neg')]
+    pos_reviews = [([word for word in movie_reviews.words(fileid)], 'pos') 
+                            for fileid in movie_reviews.fileids('pos')]
+    neg_reviews = [([word for word in movie_reviews.words(fileid)], 'neg') 
+                            for fileid in movie_reviews.fileids('neg')]
+
     all_reviews = pos_reviews + neg_reviews
     random.shuffle(all_reviews)
 
@@ -43,4 +43,16 @@ def opinion_keywords():
 
     # classifier = nltk.NaiveBayesClassifier.train(train)
 
-opinion_keywords()
+def feature_keywords():
+    #via Zhuang et all. "Movie Review Mining and Summarization"
+    features = ['film', 'movie', 'story', 'plot', 'script', 'storyline', 
+        'dialogue', 'screenplay', 'ending', 'line', 'scene', 'tale', 
+        'character', 'characterization', 'role', 'fight-scene', 'action-scene', 
+        'action-sequence', 'set', 'battle-scene', 'picture', 'scenery', 
+        'setting','visual-effects', 'color', 'background', 'image', 'music', 
+        'score', 'song', 'sound', 'soundtrack', 'theme', 'special-effects', 
+        'effect', 'CGI', 'SFX']
+
+    return features
+
+# opinion_keywords()
