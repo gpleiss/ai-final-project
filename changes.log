@@ -1,0 +1,11 @@
+4/5: Worked on extracting opinion keywords & building a sentiment classifier. 
+Used a naive bayes classifier on a pre-classified set of movie reviews. 
+Used the trained classifier to figure out which words were opinion keywords.
+
+Original feature set: the n most common words in the entire review.
+Stopwords and punctuation were removed, and all words were made lowercase.
+For each interview, each feature was marked as binary (1 if present in review, 0 if not).
+
+Number of features used: 1000
+Ratio of train set size to test set size: 0.75 to 0.25
+Accuracy of bayes classifier: 0.786
