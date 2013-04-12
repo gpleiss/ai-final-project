@@ -98,12 +98,13 @@ def keyword_opinion_pairs():
         # print opinions
         # print features
         if words & opinions != set() and words & features != set():
+            tagged_sent = nltk.pos_tag(sent)
             new = []
-            for w in sent:
-                if w in opinions or w in features:
-                    new.append(w.upper())
+            for word, tag in tagged_sent:
+                if word in opinions or word in features:
+                    new.append((word.upper(), tag))
                 else:
-                    new.append(w)
+                    new.append((word.lower(), tag))
             print new
         else:
             pass
