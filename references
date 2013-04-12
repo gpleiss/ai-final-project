@@ -1,2 +1,4 @@
 For installing jpype on a Mac:
 http://blog.y3xz.com/blog/2011/04/29/installing-jpype-on-mac-os-x/
+
+- also had to "python setup.py install" for jpype, because the rakefile only builds it, doesn't install it
