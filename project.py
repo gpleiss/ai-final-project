@@ -1,6 +1,9 @@
 import nltk
 from nltk.corpus import movie_reviews, stopwords, wordnet
 import string, random
+from stanford_parser import parser as sp
+parser = sp.Parser()
+
 
 def generate_opinion_keywords():
     def determine_features(review, featurelist):
@@ -88,27 +91,34 @@ def load_opinion_keywords():
         print "Generating opinion keywords. Might take a while."
         return generate_opinion_keywords()
 
+def shortest_path(sentence, opinion, feature):
+    parsed = parser.parseToStanfordDependencies(sentence)
+    dependencies = [(rel, gov.text, dep.text) for rel, gov, dep in parsed.dependencies]
+    for rel, gov, dep in dependencies:
+        if (gov == opinion and dep == feature) or (gov == feature and dep == opinion):
+            return rel, gov, dep
+
 
 def keyword_opinion_pairs():
     opinions = set(load_opinion_keywords()[:100])
     features = set(load_feature_keywords())
 
     for sent in movie_reviews.sents()[:2000]:
-        words = set(sent)
-        # print opinions
-        # print features
-        if words & opinions != set() and words & features != set():
-            tagged_sent = nltk.pos_tag(sent)
-            new = []
-            for word, tag in tagged_sent:
-                if word in opinions or word in features:
-                    new.append((word.upper(), tag))
-                else:
-                    new.append((word.lower(), tag))
-            print new
-        else:
-            pass
-            # print 'ignore'
+        try: 
+            words = set(sent)
+            if words & opinions != set() and words & features != set():
+                sent_str = string.join(sent, ' ')
+                for word in sent:
+                    if word in opinions:
+                        opinion = word
+                    if word in features:
+                        feature = word
+                # print sent_str
+                shortest_path(sent_str, opinion, feature)
+                print "Success for sentence with length %i" % len(sent)
+        except:
+            print "Failure for sentence with length %i" % len(sent)
+                # print shortest_path(sent_str, opinion, feature)
 
 keyword_opinion_pairs()
 # generate_feature_keywords()
