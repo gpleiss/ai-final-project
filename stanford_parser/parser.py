@@ -25,7 +25,8 @@ class Dependencies:
         self.tokensToPosTags = dict(zip(self.tokens, self.posTags))
 
         self.dependencies = dependencies
-        
+        self.dependencies_root = self.__find_root()
+
         self.govToDeps = {}
         self.depToGov = {}
         self.constituentsToRelation = {}
@@ -45,6 +46,16 @@ class Dependencies:
             self.constituentsToRelation[(gov,dep)] = relation
             
         self.checkRep()
+
+    def __find_root(self):
+        govs = set()
+        deps = set()
+        for rel, gov, dep in self.dependencies:
+            govs.add(gov.text)
+            deps.add(dep.text)
+        result = govs - deps
+        assert len(result) == 1
+        return result.pop()
 
     def tagForTokenStandoff(self, tokenStandoff):
         return self.tokensToPosTags[tokenStandoff]
@@ -157,13 +168,13 @@ class Parser:
         standoffTokens = [standoffFromToken(sentence, token)
                           for token in tokens]
         posTags = [token.tag() for token in tree.taggedYield()]
-        print " ".join(["%s/%s" % (word.text, tag) for word, tag in zip(standoffTokens, posTags)])
+        # print " ".join(["%s/%s" % (word.text, tag) for word, tag in zip(standoffTokens, posTags)])
         #print tree.taggedYield().toString(False)
         result = self.package.trees.EnglishGrammaticalStructure(tree)
         
         returnList = []
         for dependency in result.typedDependenciesCollapsedTree():
-
+            # print dependency
             govStandoff = standoffTokens[dependency.gov().index() - 1]
             depStandoff = standoffTokens[dependency.dep().index() - 1]
 

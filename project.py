@@ -2,6 +2,7 @@ import nltk
 from nltk.corpus import movie_reviews, stopwords, wordnet
 import string, random
 from stanford_parser import parser as sp
+from jpype import JavaException
 parser = sp.Parser()
 
 
@@ -91,20 +92,12 @@ def load_opinion_keywords():
         print "Generating opinion keywords. Might take a while."
         return generate_opinion_keywords()
 
-def shortest_path(sentence, opinion, feature):
-    parsed = parser.parseToStanfordDependencies(sentence)
-    dependencies = [(rel, gov.text, dep.text) for rel, gov, dep in parsed.dependencies]
-    for rel, gov, dep in dependencies:
-        if (gov == opinion and dep == feature) or (gov == feature and dep == opinion):
-            return rel, gov, dep
-
-
 def keyword_opinion_pairs():
     opinions = set(load_opinion_keywords()[:100])
     features = set(load_feature_keywords())
 
     for sent in movie_reviews.sents()[:2000]:
-        try: 
+        try:
             words = set(sent)
             if words & opinions != set() and words & features != set():
                 sent_str = string.join(sent, ' ')
@@ -113,12 +106,13 @@ def keyword_opinion_pairs():
                         opinion = word
                     if word in features:
                         feature = word
-                # print sent_str
-                shortest_path(sent_str, opinion, feature)
-                print "Success for sentence with length %i" % len(sent)
-        except:
-            print "Failure for sentence with length %i" % len(sent)
-                # print shortest_path(sent_str, opinion, feature)
+                parsed = parser.parseToStanfordDependencies(sent_str)
+                print "Success: root = %s" % parsed.dependencies_root
+        except JavaException:
+            print "Failure: sentence is too long (len = %i)" % len(sent)
+        except AssertionError:
+            print "Failure: could not find root"
+
 
 keyword_opinion_pairs()
 # generate_feature_keywords()
