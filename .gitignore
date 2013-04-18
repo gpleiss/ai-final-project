@@ -1,3 +1,4 @@
 *.pyc
 *~
 3rdParty/*
+test.py
