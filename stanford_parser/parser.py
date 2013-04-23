@@ -150,7 +150,6 @@ class Parser:
         tokens = self.documentPreprocessor.getWordsFromString(sentence)
         for token in tokens:
             if token.word() in ["down"]:
-                print "setting tag"
                 token.setTag("IN")
                 pass
             if token.word().lower() in ["bot"]:

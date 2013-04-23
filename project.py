@@ -3,7 +3,6 @@ from nltk.corpus import movie_reviews, stopwords, wordnet
 import string, random
 from stanford_parser import parser as sp
 from jpype import JavaException
-parser = sp.Parser()
 
 
 def generate_opinion_keywords():
@@ -92,7 +91,11 @@ def load_opinion_keywords():
         print "Generating opinion keywords. Might take a while."
         return generate_opinion_keywords()
 
-def construct_tree(parsed):
+
+
+
+
+def construct_dependency_tree(parsed):
     root = parsed.dependencies_root
     dependencies = set([(rel, gov.text, dep.text) for rel, gov, dep in parsed.dependencies])
     children = [(rel, gov, dep) for (rel, gov, dep) in dependencies if gov == root]
@@ -121,16 +124,16 @@ def val_in_tree(tree, val):
             return True
     return False
 
-def distance_to_root(tree, val):
+def dist_to_root(tree, val):
     if tree.node == val:
         return 0
     for child in tree:
         if val_in_tree(child, val):
-            return 1 + distance_to_root(child, val)
+            return 1 + dist_to_root(child, val)
 
-def shortest_distance(feature, opinion, sentence):
+def dist_btwn_feature_and_opinion(feature, opinion, sentence, parser):
     parsed = parser.parseToStanfordDependencies(sentence)
-    tree = construct_tree(parsed)
+    tree = construct_dependency_tree(parsed)
     subtrees = tree.subtrees(filter=lambda t: val_in_tree(t,feature) and val_in_tree(t,opinion))
 
     smallest_tree, height = None, 10000
@@ -138,41 +141,41 @@ def shortest_distance(feature, opinion, sentence):
         if subtree.height() < height:
             smallest_tree = subtree
             height = subtree.height()
-    distance = distance_to_root(smallest_tree, feature) + distance_to_root(smallest_tree, opinion)
+    distance = dist_to_root(smallest_tree, feature) + dist_to_root(smallest_tree, opinion)
     return distance
 
-
-def keyword_opinion_pairs():
-    opinions = set(load_opinion_keywords()[:100])
-    features = set(load_feature_keywords())
-
-    sents_and_shortest_distance = []
-    for sent in movie_reviews.sents(movie_reviews.fileids()[6]):
+def find_summary_sentence(fileid, opinions, features, parser):
+    summary_sents = [sent for sent in movie_reviews.sents(fileid)
+                     if (set(sent) & opinions != set()) and (set(sent) & features != set())]
+    summary_sents_with_feature_opinion_dist = []
+    for sent in summary_sents:
         try:
-            words = set(sent)
-            if words & opinions != set() and words & features != set():
-                sent_str = string.join(sent, ' ')
-                for word in sent:
-                    if word in opinions:
-                        opinion = word
-                    elif word in features:
-                        feature = word
-                distance = shortest_distance(feature, opinion, sent_str)
-                sents_and_shortest_distance.append((distance, sent_str))
+            sent_str = string.join(sent, ' ')
+            for word in sent:
+                if word in opinions:
+                    opinion = word
+                elif word in features:
+                    feature = word
+            distance = dist_btwn_feature_and_opinion(feature, opinion, sent_str, parser)
+            summary_sents_with_feature_opinion_dist.append((distance, sent_str))
         except JavaException:
-            print "Failure: sentence is too long (len = %i)" % len(sent)
+            # print "Failure: sentence is too long (len = %i)" % len(sent)
+            pass
         except AssertionError:
-            print "Failure: could not find root"
+            # print "Failure: could not find root"
+            pass
 
-    sents_and_shortest_distance.sort()
-    if len(sents_and_shortest_distance) > 0:
-        return sents_and_shortest_distance[0]
+    summary_sents_with_feature_opinion_dist.sort()
+    if len(summary_sents_with_feature_opinion_dist) > 0:
+        return summary_sents_with_feature_opinion_dist[0][1]
     else:
         return None
 
 
-print keyword_opinion_pairs()
-# generate_feature_keywords()
-# generate_opinion_keywords()
-# print type(x[0])
-# opinion_keywords()
+if __name__ == '__main__':
+    parser = sp.Parser()
+    opinions = set(load_opinion_keywords()[:100])
+    features = set(load_feature_keywords())
+    for fileid in movie_reviews.fileids():
+        print "\nReview:", fileid
+        print "Summary:\n", find_summary_sentence(fileid, opinions, features, parser)
