@@ -92,6 +92,38 @@ def load_opinion_keywords():
         print "Generating opinion keywords. Might take a while."
         return generate_opinion_keywords()
 
+def construct_tree(parsed):
+    root = parsed.dependencies_root
+    dependencies = set([(rel, gov.text, dep.text) for rel, gov, dep in parsed.dependencies])
+    children = [(rel, gov, dep) for (rel, gov, dep) in dependencies if gov == root]
+    dependencies = dependencies - set(children)
+
+
+    remaining_nodes = [nltk.Tree(dep, []) for (rel, gov, dep) in children]
+    tree = nltk.Tree(root, remaining_nodes)
+
+    # print parsed
+    print tree
+    while dependencies != set():
+        # print tree.leaves()
+        # for i in len(tree.leaves()):
+            # leaf = tree.leaves()[i]
+        node = remaining_nodes.pop(0)
+        print dependencies
+        children = [(rel, gov, dep) for (rel, gov, dep) in dependencies if gov == node.node]
+        print "node: ", node
+        print "node.node: ", node.node
+        print "children: ", children
+        dependencies = dependencies - set(children)
+
+        children_node = [nltk.Tree(dep, []) for (rel, gov, dep) in children]
+        remaining_nodes.extend(children_node)
+        node.extend(children_node)
+        print "remaining nodes", remaining_nodes
+
+    print tree
+
+
 def keyword_opinion_pairs():
     opinions = set(load_opinion_keywords()[:100])
     features = set(load_feature_keywords())
@@ -104,9 +136,10 @@ def keyword_opinion_pairs():
                 for word in sent:
                     if word in opinions:
                         opinion = word
-                    if word in features:
+                    elif word in features:
                         feature = word
                 parsed = parser.parseToStanfordDependencies(sent_str)
+                construct_tree(parsed)
                 print "Success: root = %s" % parsed.dependencies_root
         except JavaException:
             print "Failure: sentence is too long (len = %i)" % len(sent)
