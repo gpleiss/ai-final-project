@@ -133,7 +133,6 @@ def shortest_distance(feature, opinion, sentence):
     tree = construct_tree(parsed)
     subtrees = tree.subtrees(filter=lambda t: val_in_tree(t,feature) and val_in_tree(t,opinion))
 
-
     smallest_tree, height = None, 10000
     for subtree in subtrees:
         if subtree.height() < height:
@@ -147,7 +146,8 @@ def keyword_opinion_pairs():
     opinions = set(load_opinion_keywords()[:100])
     features = set(load_feature_keywords())
 
-    for sent in movie_reviews.sents()[:2000]:
+    sents_and_shortest_distance = []
+    for sent in movie_reviews.sents(movie_reviews.fileids()[6]):
         try:
             words = set(sent)
             if words & opinions != set() and words & features != set():
@@ -157,16 +157,21 @@ def keyword_opinion_pairs():
                         opinion = word
                     elif word in features:
                         feature = word
-                shortest_distance(feature, opinion, sent_str)
-                # parsed = parser.parseToStanfordDependencies(sent_str)
-                # tree = construct_tree(parsed)
+                distance = shortest_distance(feature, opinion, sent_str)
+                sents_and_shortest_distance.append((distance, sent_str))
         except JavaException:
             print "Failure: sentence is too long (len = %i)" % len(sent)
         except AssertionError:
             print "Failure: could not find root"
 
+    sents_and_shortest_distance.sort()
+    if len(sents_and_shortest_distance) > 0:
+        return sents_and_shortest_distance[0]
+    else:
+        return None
 
-keyword_opinion_pairs()
+
+print keyword_opinion_pairs()
 # generate_feature_keywords()
 # generate_opinion_keywords()
 # print type(x[0])
