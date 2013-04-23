@@ -111,8 +111,36 @@ def construct_tree(parsed):
         remaining_nodes.extend(children_nodes)
         node.extend(children_nodes)
         dependencies = dependencies - set(children)
+    return tree
 
-    print tree
+def val_in_tree(tree, val):
+    if (tree.node == val):
+        return True
+    for child in tree:
+        if val_in_tree(child, val):
+            return True
+    return False
+
+def distance_to_root(tree, val):
+    if tree.node == val:
+        return 0
+    for child in tree:
+        if val_in_tree(child, val):
+            return 1 + distance_to_root(child, val)
+
+def shortest_distance(feature, opinion, sentence):
+    parsed = parser.parseToStanfordDependencies(sentence)
+    tree = construct_tree(parsed)
+    subtrees = tree.subtrees(filter=lambda t: val_in_tree(t,feature) and val_in_tree(t,opinion))
+
+
+    smallest_tree, height = None, 10000
+    for subtree in subtrees:
+        if subtree.height() < height:
+            smallest_tree = subtree
+            height = subtree.height()
+    distance = distance_to_root(smallest_tree, feature) + distance_to_root(smallest_tree, opinion)
+    return distance
 
 
 def keyword_opinion_pairs():
@@ -129,8 +157,9 @@ def keyword_opinion_pairs():
                         opinion = word
                     elif word in features:
                         feature = word
-                parsed = parser.parseToStanfordDependencies(sent_str)
-                tree = construct_tree(parsed)
+                shortest_distance(feature, opinion, sent_str)
+                # parsed = parser.parseToStanfordDependencies(sent_str)
+                # tree = construct_tree(parsed)
         except JavaException:
             print "Failure: sentence is too long (len = %i)" % len(sent)
         except AssertionError:
