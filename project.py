@@ -75,16 +75,20 @@ def generate_feature_keywords():
 
     return features
 
-def load_feature_keywords():
+def load_feature_keywords(reload=False):
     try:
+        if reload:
+            raise Exception()
         with open('features.txt', 'r') as features:
             return [word.strip() for word in features.readlines()]
     except:
         print "Generating feature keywords."
         return generate_feature_keywords()
 
-def load_opinion_keywords():
+def load_opinion_keywords(reload=False):
     try:
+        if reload:
+            raise Exception()
         with open('opinions.txt', 'r') as opinions:
             return [word.strip() for word in opinions.readlines()]
     except:
