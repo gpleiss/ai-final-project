@@ -144,11 +144,29 @@ def dist_btwn_feature_and_opinion(feature, opinion, sentence, parser):
     distance = dist_to_root(smallest_tree, feature) + dist_to_root(smallest_tree, opinion)
     return distance
 
-def find_summary_sentence(fileid, opinions, features, parser):
-    summary_sents = [sent for sent in movie_reviews.sents(fileid)
-                     if (set(sent) & opinions != set()) and (set(sent) & features != set())]
+def open_file_as_sentences(filename, features, opinions):
+    f = open(filename, 'rb').read()
+    sentences = [sent.split(' ') for sent in nltk.tokenize.sent_tokenize(f)
+                    if (set(sent) & opinions != set()) and (set(sent) & features != set())]
+    return sentences
+
+def find_summary_sentence(parser, fileid=None, localfile=None):
+    opinions = set(load_opinion_keywords()[:100])
+    features = set(load_feature_keywords())
+
+    if fileid and (not localfile):
+        summary_sents = [sent for sent in movie_reviews.sents(fileid)
+                         if (set(sent) & opinions != set()) and (set(sent) & features != set())]
+
+    elif (not fileid) and localfile:
+        summary_sents = open_file_as_sentences(localfile, features, opinions)
+    else:
+        print "Please enter an nltk fileid, or the name of a local textfile"
+        return
+
     summary_sents_with_feature_opinion_dist = []
     for sent in summary_sents:
+        print "analyzing:", sent
         try:
             sent_str = string.join(sent, ' ')
             for word in sent:
@@ -174,8 +192,7 @@ def find_summary_sentence(fileid, opinions, features, parser):
 
 if __name__ == '__main__':
     parser = sp.Parser()
-    opinions = set(load_opinion_keywords()[:100])
-    features = set(load_feature_keywords())
-    for fileid in movie_reviews.fileids():
-        print "\nReview:", fileid
-        print "Summary:\n", find_summary_sentence(fileid, opinions, features, parser)
+    find_summary_sentence(parser, localfile='review_painandgain.txt')
+    # for fileid in movie_reviews.fileids():
+    #     print "\nReview:", fileid
+    #     print "Summary:\n", find_summary_sentence(parser, fileid=fileid)
