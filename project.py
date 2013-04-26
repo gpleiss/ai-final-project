@@ -1,6 +1,6 @@
 import nltk
 from nltk.corpus import movie_reviews, stopwords, wordnet
-import string, random
+import string, random, re
 from stanford_parser import parser as sp
 from jpype import JavaException
 
@@ -145,37 +145,53 @@ def dist_btwn_feature_and_opinion(feature, opinion, sentence, parser):
     return distance
 
 def open_file_as_sentences(filename, features, opinions):
-    f = open(filename, 'rb').read()
-    sentences = [sent.split(' ') for sent in nltk.tokenize.sent_tokenize(f)
-                    if (set(sent) & opinions != set()) and (set(sent) & features != set())]
+    f = open(filename, 'r').read()
+    sentences = [sent.split(' ') for sent in nltk.tokenize.sent_tokenize(f)]
+                    # if (set(sent) & opinions != set()) and (set(sent) & features != set())]
     return sentences
+
+def find_proper_nouns(sentence):
+    if type(sentence) == list:
+        sentence = string.join(sentence[1:], ' ')
+        
+    regex = re.compile('[A-Z][a-z]+')
+    return [word.strip(string.punctuation) for word in regex.findall(sentence)]
 
 def find_summary_sentence(parser, fileid=None, localfile=None):
     opinions = set(load_opinion_keywords()[:100])
     features = set(load_feature_keywords())
 
     if fileid and (not localfile):
-        summary_sents = [sent for sent in movie_reviews.sents(fileid)
-                         if (set(sent) & opinions != set()) and (set(sent) & features != set())]
-
+        source = movie_reviews.sents(fileid)
     elif (not fileid) and localfile:
-        summary_sents = open_file_as_sentences(localfile, features, opinions)
+        source= open_file_as_sentences(localfile, features, opinions)
     else:
         print "Please enter an nltk fileid, or the name of a local textfile"
         return
 
+    summary_sents = [[word.strip(string.punctuation) for word in sent] 
+                        for sent in source
+                        if (set(sent) & opinions != set()) and 
+                        ((set(sent) & features != set()) or len(find_proper_nouns(sent)) > 0)]
+
     summary_sents_with_feature_opinion_dist = []
     for sent in summary_sents:
-        print "analyzing:", sent
         try:
+            feature, opinion = None, None
             sent_str = string.join(sent, ' ')
+            proper_nouns = set(find_proper_nouns(sent))
+
             for word in sent:
                 if word in opinions:
                     opinion = word
-                elif word in features:
+                elif (word in features):
                     feature = word
-            distance = dist_btwn_feature_and_opinion(feature, opinion, sent_str, parser)
-            summary_sents_with_feature_opinion_dist.append((distance, sent_str))
+                elif (word in proper_nouns):
+                    feature = word
+
+            if feature and opinion:
+                distance = dist_btwn_feature_and_opinion(feature, opinion, sent_str, parser)
+                summary_sents_with_feature_opinion_dist.append((distance, sent_str))
         except JavaException:
             # print "Failure: sentence is too long (len = %i)" % len(sent)
             pass
@@ -192,7 +208,7 @@ def find_summary_sentence(parser, fileid=None, localfile=None):
 
 if __name__ == '__main__':
     parser = sp.Parser()
-    find_summary_sentence(parser, localfile='review_painandgain.txt')
+    print find_summary_sentence(parser, localfile='review_painandgain.txt')
     # for fileid in movie_reviews.fileids():
     #     print "\nReview:", fileid
     #     print "Summary:\n", find_summary_sentence(parser, fileid=fileid)
