@@ -1,5 +1,5 @@
 """
-    Creates html for a mechanical turk entry for a movie review.
+    Creates html for an Amazon mechanical turk entry for a movie review.
     Entry asks reader to read every sentence of a review, and then choose
     (via radio-button form) the most summarizing sentence of the review
 """
