@@ -3,7 +3,8 @@ Rachel and Geoff's AI project, spring 2013.
 
 Given a movie review, finds the sentence which best summmarizes the review. Based on research by Zhuang et al., available [here](http://research.microsoft.com/en-us/um/people/leizhang/Paper/cikm06_movie.pdf).
 
-Requires Stanford Parser, written in Java. We've got the python wrapper included, but you need
+Requires Stanford Parser, written in Java. We've got the python wrapper included, but you need to download the Java package separately, as described below. 
+
 
 Setup
 -----
