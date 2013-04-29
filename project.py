@@ -87,8 +87,6 @@ def load_opinion_keywords(reload=False):
 
 
 
-
-
 def construct_dependency_tree(parsed):
     root = parsed.dependencies_root
     dependencies = set([(rel, gov.text, dep.text) for rel, gov, dep in parsed.dependencies])
@@ -141,7 +139,6 @@ def dist_btwn_feature_and_opinion(feature, opinion, sentence, parser):
 def open_file_as_sentences(filename, features, opinions):
     f = open(filename, 'r').read()
     sentences = [sent.split(' ') for sent in nltk.tokenize.sent_tokenize(f)]
-                    # if (set(sent) & opinions != set()) and (set(sent) & features != set())]
     return sentences
 
 def find_proper_nouns(sentence):
@@ -168,11 +165,13 @@ def find_summary_sentence(parser, fileid=None, localfile=None):
         print "Please enter an nltk fileid, or the name of a local textfile"
         return
 
-    summary_sents = [[word.strip(string.punctuation) for word in sent] 
+    summary_sents = [[word.rstrip(string.punctuation) for word in sent 
+                        if word.rstrip(string.punctuation) != ''] 
                         for sent in source
                         if (set(sent) & opinion_words != set()) and 
                         ((set(sent) & feature_words != set()) or 
                             len(find_proper_nouns(sent)) > 0)]
+    # print source[0]
 
     summary_sents_with_feature_opinion_dist = []
     for sent in summary_sents:
