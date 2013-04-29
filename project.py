@@ -61,13 +61,16 @@ def generate_opinion_keywords():
 
 def generate_feature_keywords():
     #via Zhuang et all. "Movie Review Mining and Summarization"
-    features = ['film', 'movie', 'story', 'plot', 'script', 'storyline', 
-        'dialogue', 'screenplay', 'ending', 'line', 'scene', 'tale', 
-        'character', 'characterization', 'role', 'fight-scene', 'action-scene', 
-        'action-sequence', 'set', 'battle-scene', 'picture', 'scenery', 
-        'setting','visual-effects', 'color', 'background', 'image', 'music', 
-        'score', 'song', 'sound', 'soundtrack', 'theme', 'special-effects', 
-        'effect', 'CGI', 'SFX']
+    features = {'film': 0,
+                'movie': 0,
+                'story': 1, 'plot': 1,'script': 1,'storyline': 1,'dialogue': 1,
+                'screenplay': 1,'ending': 1,'line': 1,'scene': 1,'tale': 1,
+                'character': 3, 'characterization': 3, 'role': 3,
+                'fight-scene': 4,'action-scene': 4,'action-sequence': 4,'image': 4,
+                'set': 4,'battle-scene': 4,'picture': 4,'scenery': 4,
+                'setting': 4,'visual-effects': 4,'color': 4,'background': 4,
+                'music': 5, 'score': 5, 'song': 5, 'sound': 5, 'soundtrack': 5, 
+                'theme': 5,'special-effects': 6, 'effect': 6, 'CGI': 6, 'SFX':6}
 
     f = open('features.txt', 'w')
     for word in features:
@@ -76,14 +79,7 @@ def generate_feature_keywords():
     return features
 
 def load_feature_keywords(reload=False):
-    try:
-        if reload:
-            raise Exception()
-        with open('features.txt', 'r') as features:
-            return [word.strip() for word in features.readlines()]
-    except:
-        print "Generating feature keywords."
-        return generate_feature_keywords()
+    return generate_feature_keywords()
 
 def load_opinion_keywords(reload=False):
     try:
@@ -161,14 +157,17 @@ def find_proper_nouns(sentence):
     regex = re.compile('[A-Z][a-z]+')
     return [word.strip(string.punctuation) for word in regex.findall(sentence)]
 
+
 def find_summary_sentence(parser, fileid=None, localfile=None):
     opinions = set(load_opinion_keywords()[:100])
-    features = set(load_feature_keywords())
+    feature_ranks = load_feature_keywords()
+    proper_noun_rank = 2
+    feature_words = set(feature_ranks.keys())
 
     if fileid and (not localfile):
         source = movie_reviews.sents(fileid)
     elif (not fileid) and localfile:
-        source= open_file_as_sentences(localfile, features, opinions)
+        source = open_file_as_sentences(localfile, feature_words, opinions)
     else:
         print "Please enter an nltk fileid, or the name of a local textfile"
         return
@@ -176,22 +175,25 @@ def find_summary_sentence(parser, fileid=None, localfile=None):
     summary_sents = [[word.strip(string.punctuation) for word in sent] 
                         for sent in source
                         if (set(sent) & opinions != set()) and 
-                        ((set(sent) & features != set()) or len(find_proper_nouns(sent)) > 0)]
+                        ((set(sent) & feature_words != set()) or 
+                            len(find_proper_nouns(sent)) > 0)]
 
     summary_sents_with_feature_opinion_dist = []
     for sent in summary_sents:
         try:
-            feature, opinion = None, None
+            feature, feature_rank, opinion = None, 10000, None
             sent_str = string.join(sent, ' ')
             proper_nouns = set(find_proper_nouns(sent))
 
             for word in sent:
                 if word in opinions:
                     opinion = word
-                elif (word in features):
+                elif (word in feature_words) and feature_ranks[word] < feature_rank:
                     feature = word
-                elif (word in proper_nouns):
+                    feature_rank = feature_ranks[word]
+                elif (word in proper_nouns) and proper_noun_rank < feature_rank :
                     feature = word
+                    feature_rank = proper_noun_rank
 
             if feature and opinion:
                 distance = dist_btwn_feature_and_opinion(feature, opinion, sent_str, parser)
@@ -212,7 +214,7 @@ def find_summary_sentence(parser, fileid=None, localfile=None):
 
 if __name__ == '__main__':
     parser = sp.Parser()
-    print find_summary_sentence(parser, localfile='review_painandgain.txt')
-    # for fileid in movie_reviews.fileids():
-    #     print "\nReview:", fileid
-    #     print "Summary:\n", find_summary_sentence(parser, fileid=fileid)
+    # print find_summary_sentence(parser, localfile='review_painandgain.txt')
+    for fileid in movie_reviews.fileids():
+        print "\nReview:", fileid
+        print "Summary:\n", find_summary_sentence(parser, fileid=fileid)
