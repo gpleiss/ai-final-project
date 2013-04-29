@@ -33,4 +33,4 @@ To summarize each review included in the NLTK movie_reviews corpus:
 To summarize a movie review not included in the NLTK:
     
     $ python summarizer.py filename.txt
-(We include 2 NYTimes movie reviews, review_oblivion.txt and review_painandgain.txt)
+(We include 1 NYTimes movie reviews, review_painandgain.txt)

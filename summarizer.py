@@ -1,6 +1,6 @@
 import nltk
 from nltk.corpus import movie_reviews, stopwords, wordnet
-import string, random, re
+import string, random, re, sys
 from stanford_parser import parser as sp
 from jpype import JavaException
 
@@ -229,8 +229,6 @@ def find_summary_sentence(parser, fileid=None, localfile=None):
                 if (word in opinion_words) and opinion_ranks[word] < opinion_rank:
                     opinion = word
                     opinion_rank = opinion_ranks[word]
-                elif (word in opinion_words) and opinion_ranks[word] > opinion_rank:
-                    print word, opinion_ranks[word]
                 elif (word in feature_words) and feature_ranks[word] < feature_rank:
                     feature = word
                     feature_rank = feature_ranks[word]
@@ -259,7 +257,11 @@ def find_summary_sentence(parser, fileid=None, localfile=None):
 
 if __name__ == '__main__':
     parser = sp.Parser()
-    # print find_summary_sentence(parser, localfile='review_painandgain.txt')
-    for fileid in movie_reviews.fileids():
-        print "\nReview:", fileid
-        print "Summary:\n", find_summary_sentence(parser, fileid=fileid)
+    if len(sys.argv) > 1:
+        for fname in sys.argv[1:]:
+            print "\nReview: %s" % fname
+            print "Summary: %s\n" % find_summary_sentence(parser, localfile=fname)
+    else:
+        for fileid in movie_reviews.fileids():
+            print "\nReview:", fileid
+            print "Summary:\n", find_summary_sentence(parser, fileid=fileid)
