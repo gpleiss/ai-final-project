@@ -59,7 +59,7 @@ def generate_opinion_keywords():
     return opinion_keywords
 
 
-def generate_feature_keywords():
+def load_feature_keywords():
     #via Zhuang et all. "Movie Review Mining and Summarization"
     features = {'film': 0,
                 'movie': 0,
@@ -72,21 +72,15 @@ def generate_feature_keywords():
                 'music': 5, 'score': 5, 'song': 5, 'sound': 5, 'soundtrack': 5, 
                 'theme': 5,'special-effects': 6, 'effect': 6, 'CGI': 6, 'SFX':6}
 
-    f = open('features.txt', 'w')
-    for word in features:
-        f.write("%s\n" % word)
-
     return features
 
-def load_feature_keywords(reload=False):
-    return generate_feature_keywords()
 
 def load_opinion_keywords(reload=False):
     try:
         if reload:
             raise Exception()
         with open('opinions.txt', 'r') as opinions:
-            return [word.strip() for word in opinions.readlines()]
+            return {word.strip(): i for i, word in enumerate(opinions.readlines()[:100])}
     except:
         print "Generating opinion keywords. Might take a while."
         return generate_opinion_keywords()
@@ -159,35 +153,41 @@ def find_proper_nouns(sentence):
 
 
 def find_summary_sentence(parser, fileid=None, localfile=None):
-    opinions = set(load_opinion_keywords()[:100])
+    opinion_ranks = load_opinion_keywords()
     feature_ranks = load_feature_keywords()
     proper_noun_rank = 2
+    
     feature_words = set(feature_ranks.keys())
+    opinion_words = set(opinion_ranks.keys())
 
     if fileid and (not localfile):
         source = movie_reviews.sents(fileid)
     elif (not fileid) and localfile:
-        source = open_file_as_sentences(localfile, feature_words, opinions)
+        source = open_file_as_sentences(localfile, feature_words, opinion_words)
     else:
         print "Please enter an nltk fileid, or the name of a local textfile"
         return
 
     summary_sents = [[word.strip(string.punctuation) for word in sent] 
                         for sent in source
-                        if (set(sent) & opinions != set()) and 
+                        if (set(sent) & opinion_words != set()) and 
                         ((set(sent) & feature_words != set()) or 
                             len(find_proper_nouns(sent)) > 0)]
 
     summary_sents_with_feature_opinion_dist = []
     for sent in summary_sents:
         try:
-            feature, feature_rank, opinion = None, 10000, None
+            feature, feature_rank = None, 10000
+            opinion, opinion_rank = None, 10000
             sent_str = string.join(sent, ' ')
             proper_nouns = set(find_proper_nouns(sent))
 
             for word in sent:
-                if word in opinions:
+                if (word in opinion_words) and opinion_ranks[word] < opinion_rank:
                     opinion = word
+                    opinion_rank = opinion_ranks[word]
+                elif (word in opinion_words) and opinion_ranks[word] > opinion_rank:
+                    print word, opinion_ranks[word]
                 elif (word in feature_words) and feature_ranks[word] < feature_rank:
                     feature = word
                     feature_rank = feature_ranks[word]
