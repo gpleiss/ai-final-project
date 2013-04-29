@@ -5,6 +5,11 @@ Given a movie review, finds the sentence which best summmarizes the review. Base
 
 Requires Stanford Parser, written in Java. We've got the python wrapper included, but you need to download the Java package separately, as described below. 
 
+Example
+-------
+The [NYTimes review for "Pain and Gain"](http://movies.nytimes.com/2013/04/26/movies/michael-bays-pain-gain-with-mark-wahlberg.html?_r=0) is summarized by the sentence:
+
+> It all leaves you pondering whether you have just seen a monumentally stupid movie or a brilliant movie about the nature and consequences of stupidity
 
 Setup
 -----
